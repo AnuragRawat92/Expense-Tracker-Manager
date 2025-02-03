@@ -54,12 +54,21 @@
   border: none;
   padding: 12px;
   border-radius: 8px;
-  color: white;
+  color: white;  /* Ensures text remains visible while typing */
+  caret-color: white; /* Ensures cursor color is visible */
 }
 
 .login-form input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
+
+/* Ensure text is always visible */
+.login-form input:focus, 
+.login-form input:active {
+  color: white;  
+  background: rgba(255, 255, 255, 0.3);
+}
+
 
 .login-form .ant-form-item {
   margin-bottom: 15px;
