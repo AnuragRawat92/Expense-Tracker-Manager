@@ -26,15 +26,15 @@ const HomePage = () => {
 
   const fetchTransactions = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
+      const user = JSON.parse(localStorage.getItem("user"));
       const res = await axios.post("/api/v1/transactions/get-transaction", {
         userid: user._id,
         frequency,
         selectedDate,
         type,
       });
-      setAllTransaction(res.data);
+      setAllTransaction(res.data || []);
     } catch (error) {
       message.error("Error fetching transactions");
     } finally {
@@ -47,9 +47,7 @@ const HomePage = () => {
       setLoading(true);
       await axios.post("/api/v1/transactions/delete-transaction", { transactionID: record._id });
       message.success("Transaction deleted");
-
-      // **Update state immediately**
-      setAllTransaction((prev) => prev.filter((item) => item._id !== record._id));
+      fetchTransactions();
     } catch (error) {
       message.error("Unable to delete transaction");
     } finally {
@@ -59,8 +57,8 @@ const HomePage = () => {
 
   const handleSubmit = async (values) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
+      const user = JSON.parse(localStorage.getItem("user"));
 
       if (editable) {
         await axios.post("/api/v1/transactions/edit-transaction", {
@@ -68,21 +66,18 @@ const HomePage = () => {
           transactionID: editable._id,
         });
         message.success("Transaction updated successfully");
-
-        // **Update state immediately**
-        setAllTransaction((prev) =>
-          prev.map((item) => (item._id === editable._id ? { ...item, ...values } : item))
-        );
       } else {
         const res = await axios.post("/api/v1/transactions/add-transaction", { ...values, userid: user._id });
-        message.success("Transaction added successfully");
 
-        // **Update state immediately**
-        setAllTransaction((prev) => [...prev, res.data]);
+        if (res.data && res.data._id) {
+          setAllTransaction((prev) => [...prev, res.data]);
+        }
+        message.success("Transaction added successfully");
       }
 
       setShowModal(false);
       setEditable(null);
+      fetchTransactions();
     } catch (error) {
       message.error("Failed to save transaction");
     } finally {
@@ -167,11 +162,11 @@ const HomePage = () => {
       {/* Add/Edit Modal */}
       <Modal title={editable ? "Edit Transaction" : "Add Transaction"} open={showModal} onCancel={() => setShowModal(false)} footer={false} className="custom-modal">
         <Form layout="vertical" onFinish={handleSubmit} initialValues={editable} className="custom-form">
-          <Form.Item label="Amount" name="amount">
+          <Form.Item label="Amount" name="amount" rules={[{ required: true, message: "Amount is required" }]}>
             <Input type="number" />
           </Form.Item>
 
-          <Form.Item label="Type" name="type">
+          <Form.Item label="Type" name="type" rules={[{ required: true, message: "Type is required" }]}>
             <Select>
               <Select.Option value="income">Income</Select.Option>
               <Select.Option value="expense">Expense</Select.Option>
@@ -179,13 +174,7 @@ const HomePage = () => {
           </Form.Item>
 
           <Form.Item label="Category" name="category">
-            <Select>
-              <Select.Option value="salary">Salary</Select.Option>
-              <Select.Option value="business">Business</Select.Option>
-              <Select.Option value="investment">Investment</Select.Option>
-              <Select.Option value="food">Food</Select.Option>
-              <Select.Option value="bills">Bills</Select.Option>
-            </Select>
+            <Input type="text" />
           </Form.Item>
 
           <Form.Item label="Date" name="date">
@@ -210,5 +199,6 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
 
 
