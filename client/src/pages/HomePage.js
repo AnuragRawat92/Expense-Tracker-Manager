@@ -26,14 +26,12 @@ const HomePage = () => {
 
   const fetchTransactions = async () => {
     try {
-      setLoading(true);
       const user = JSON.parse(localStorage.getItem("user"));
+      setLoading(true);
       const res = await axios.post("/api/v1/transactions/get-transaction", {
         userid: user._id,
         frequency,
-        selectedDate: selectedDate.length
-          ? selectedDate.map((date) => moment(date).format("YYYY-MM-DD"))
-          : [],
+        selectedDate,
         type,
       });
       setAllTransaction(res.data);
@@ -50,8 +48,8 @@ const HomePage = () => {
       await axios.post("/api/v1/transactions/delete-transaction", { transactionID: record._id });
       message.success("Transaction deleted");
 
-      // Directly update the state instead of re-fetching
-      setAllTransaction((prev) => prev.filter((transaction) => transaction._id !== record._id));
+      // **Update state immediately**
+      setAllTransaction((prev) => prev.filter((item) => item._id !== record._id));
     } catch (error) {
       message.error("Unable to delete transaction");
     } finally {
@@ -61,32 +59,28 @@ const HomePage = () => {
 
   const handleSubmit = async (values) => {
     try {
-      setLoading(true);
       const user = JSON.parse(localStorage.getItem("user"));
-      let updatedTransactions;
+      setLoading(true);
 
       if (editable) {
-        const response = await axios.post("/api/v1/transactions/edit-transaction", {
-          payload: { ...values, userid: user._id, date: moment(values.date).format("YYYY-MM-DD") },
+        await axios.post("/api/v1/transactions/edit-transaction", {
+          payload: { ...values, userId: user._id },
           transactionID: editable._id,
         });
         message.success("Transaction updated successfully");
 
-        updatedTransactions = allTransaction.map((transaction) =>
-          transaction._id === editable._id ? { ...transaction, ...response.data } : transaction
+        // **Update state immediately**
+        setAllTransaction((prev) =>
+          prev.map((item) => (item._id === editable._id ? { ...item, ...values } : item))
         );
       } else {
-        const response = await axios.post("/api/v1/transactions/add-transaction", {
-          ...values,
-          userid: user._id,
-          date: moment(values.date).format("YYYY-MM-DD"),
-        });
+        const res = await axios.post("/api/v1/transactions/add-transaction", { ...values, userid: user._id });
         message.success("Transaction added successfully");
 
-        updatedTransactions = [...allTransaction, response.data];
+        // **Update state immediately**
+        setAllTransaction((prev) => [...prev, res.data]);
       }
 
-      setAllTransaction(updatedTransactions);
       setShowModal(false);
       setEditable(null);
     } catch (error) {
@@ -185,14 +179,24 @@ const HomePage = () => {
           </Form.Item>
 
           <Form.Item label="Category" name="category">
-            <Input type="text" />
+            <Select>
+              <Select.Option value="salary">Salary</Select.Option>
+              <Select.Option value="business">Business</Select.Option>
+              <Select.Option value="investment">Investment</Select.Option>
+              <Select.Option value="food">Food</Select.Option>
+              <Select.Option value="bills">Bills</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item label="Date" name="date">
-            <DatePicker className="full-width" />
+            <Input type="date" />
           </Form.Item>
 
           <Form.Item label="Reference" name="reference">
+            <Input type="text" />
+          </Form.Item>
+
+          <Form.Item label="Description" name="description">
             <Input type="text" />
           </Form.Item>
 
