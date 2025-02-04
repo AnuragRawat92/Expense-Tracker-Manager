@@ -7,7 +7,6 @@ import axios from "axios";
 import Spinner from "../components/Spinner";
 import Analytics from "../components/Analytics";
 import "../styles/HomePage.css";
-import { Footer } from "antd/es/layout/layout";
 
 const { RangePicker } = DatePicker;
 
@@ -32,7 +31,7 @@ const HomePage = () => {
       const res = await axios.post("/api/v1/transactions/get-transaction", {
         userid: user._id,
         frequency,
-        selectedDate,
+        selectedDate: selectedDate.length ? selectedDate.map(date => moment(date).format("YYYY-MM-DD")) : [],
         type,
       });
       setAllTransaction(res.data);
@@ -48,7 +47,9 @@ const HomePage = () => {
       setLoading(true);
       await axios.post("/api/v1/transactions/delete-transaction", { transactionID: record._id });
       message.success("Transaction deleted");
-      fetchTransactions();
+
+      // Directly update state instead of re-fetching
+      setAllTransaction((prev) => prev.filter((transaction) => transaction._id !== record._id));
     } catch (error) {
       message.error("Unable to delete transaction");
     } finally {
@@ -60,19 +61,27 @@ const HomePage = () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
+      let updatedTransactions;
       if (editable) {
-        await axios.post("/api/v1/transactions/edit-transaction", {
+        const response = await axios.post("/api/v1/transactions/edit-transaction", {
           payload: { ...values, userId: user._id },
           transactionID: editable._id,
         });
         message.success("Transaction updated successfully");
+
+        updatedTransactions = allTransaction.map((transaction) =>
+          transaction._id === editable._id ? { ...transaction, ...response.data } : transaction
+        );
       } else {
-        await axios.post("/api/v1/transactions/add-transaction", { ...values, userid: user._id });
+        const response = await axios.post("/api/v1/transactions/add-transaction", { ...values, userid: user._id });
         message.success("Transaction added successfully");
+
+        updatedTransactions = [...allTransaction, response.data];
       }
+
+      setAllTransaction(updatedTransactions);
       setShowModal(false);
       setEditable(null);
-      fetchTransactions();
     } catch (error) {
       message.error("Failed to save transaction");
     } finally {
@@ -171,28 +180,16 @@ const HomePage = () => {
           <Form.Item label="Category" name="category">
             <Select>
               <Select.Option value="salary">Salary</Select.Option>
-              <Select.Option value="Buisness Profit">Buisness Profit</Select.Option>
-              <Select.Option value="Investments">Investments</Select.Option>
-              <Select.Option value="Rentals">Rentals</Select.Option>
-              <Select.Option value="Government Profits">Government Profits</Select.Option>
-              <Select.Option value="food">Food</Select.Option>
-              <Select.Option value="bills">Bills</Select.Option>
-              <Select.Option value="fees">Fees</Select.Option>
-              <Select.Option value="Movie">Movie</Select.Option>
-              <Select.Option value="Medical Expenses">Medical Expenses</Select.Option>
-              <Select.Option value="Daily Essential">Daily Essential</Select.Option>
+              <Select.Option value="business profit">Business Profit</Select.Option>
+              <Select.Option value="investment">Investment</Select.Option>
             </Select>
           </Form.Item>
 
           <Form.Item label="Date" name="date">
-            <Input type="date" />
+            <DatePicker className="full-width" />
           </Form.Item>
 
           <Form.Item label="Reference" name="reference">
-            <Input type="text" />
-          </Form.Item>
-
-          <Form.Item label="Description" name="description">
             <Input type="text" />
           </Form.Item>
 
@@ -201,11 +198,10 @@ const HomePage = () => {
           </div>
         </Form>
       </Modal>
-     
     </Layout>
-    
   );
 };
 
 export default HomePage;
+
 
