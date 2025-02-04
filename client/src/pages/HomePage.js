@@ -26,12 +26,14 @@ const HomePage = () => {
 
   const fetchTransactions = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
+      const user = JSON.parse(localStorage.getItem("user"));
       const res = await axios.post("/api/v1/transactions/get-transaction", {
         userid: user._id,
         frequency,
-        selectedDate: selectedDate.length ? selectedDate.map(date => moment(date).format("YYYY-MM-DD")) : [],
+        selectedDate: selectedDate.length
+          ? selectedDate.map((date) => moment(date).format("YYYY-MM-DD"))
+          : [],
         type,
       });
       setAllTransaction(res.data);
@@ -48,7 +50,7 @@ const HomePage = () => {
       await axios.post("/api/v1/transactions/delete-transaction", { transactionID: record._id });
       message.success("Transaction deleted");
 
-      // Directly update state instead of re-fetching
+      // Directly update the state instead of re-fetching
       setAllTransaction((prev) => prev.filter((transaction) => transaction._id !== record._id));
     } catch (error) {
       message.error("Unable to delete transaction");
@@ -59,12 +61,13 @@ const HomePage = () => {
 
   const handleSubmit = async (values) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
       setLoading(true);
+      const user = JSON.parse(localStorage.getItem("user"));
       let updatedTransactions;
+
       if (editable) {
         const response = await axios.post("/api/v1/transactions/edit-transaction", {
-          payload: { ...values, userId: user._id },
+          payload: { ...values, userid: user._id, date: moment(values.date).format("YYYY-MM-DD") },
           transactionID: editable._id,
         });
         message.success("Transaction updated successfully");
@@ -73,7 +76,11 @@ const HomePage = () => {
           transaction._id === editable._id ? { ...transaction, ...response.data } : transaction
         );
       } else {
-        const response = await axios.post("/api/v1/transactions/add-transaction", { ...values, userid: user._id });
+        const response = await axios.post("/api/v1/transactions/add-transaction", {
+          ...values,
+          userid: user._id,
+          date: moment(values.date).format("YYYY-MM-DD"),
+        });
         message.success("Transaction added successfully");
 
         updatedTransactions = [...allTransaction, response.data];
@@ -178,11 +185,7 @@ const HomePage = () => {
           </Form.Item>
 
           <Form.Item label="Category" name="category">
-            <Select>
-              <Select.Option value="salary">Salary</Select.Option>
-              <Select.Option value="business profit">Business Profit</Select.Option>
-              <Select.Option value="investment">Investment</Select.Option>
-            </Select>
+            <Input type="text" />
           </Form.Item>
 
           <Form.Item label="Date" name="date">
