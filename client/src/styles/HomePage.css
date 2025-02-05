@@ -254,3 +254,25 @@ h6 {
     font-size: 14px;
   }
 }
+/* Main Table Wrapper */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile-specific styles for table */
+@media (max-width: 768px) {
+  .table-wrapper {
+    max-width: 100%;
+    overflow-x: scroll;
+  }
+
+  .ant-table-wrapper {
+    display: block;
+  }
+
+  .ant-table {
+    min-width: 800px; /* Or adjust this width based on your table's content */
+  }
+}
+
