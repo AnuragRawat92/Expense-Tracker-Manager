@@ -26,15 +26,15 @@ const HomePage = () => {
 
   const fetchTransactions = async () => {
     try {
-      setLoading(true);
       const user = JSON.parse(localStorage.getItem("user"));
+      setLoading(true);
       const res = await axios.post("/api/v1/transactions/get-transaction", {
         userid: user._id,
         frequency,
         selectedDate,
         type,
       });
-      setAllTransaction(res.data || []);
+      setAllTransaction(res.data);
     } catch (error) {
       message.error("Error fetching transactions");
     } finally {
@@ -57,9 +57,8 @@ const HomePage = () => {
 
   const handleSubmit = async (values) => {
     try {
-      setLoading(true);
       const user = JSON.parse(localStorage.getItem("user"));
-
+      setLoading(true);
       if (editable) {
         await axios.post("/api/v1/transactions/edit-transaction", {
           payload: { ...values, userId: user._id },
@@ -67,14 +66,9 @@ const HomePage = () => {
         });
         message.success("Transaction updated successfully");
       } else {
-        const res = await axios.post("/api/v1/transactions/add-transaction", { ...values, userid: user._id });
-
-        if (res.data && res.data._id) {
-          setAllTransaction((prev) => [...prev, res.data]);
-        }
+        await axios.post("/api/v1/transactions/add-transaction", { ...values, userid: user._id });
         message.success("Transaction added successfully");
       }
-
       setShowModal(false);
       setEditable(null);
       fetchTransactions();
@@ -146,27 +140,30 @@ const HomePage = () => {
           </Select>
         </div>
 
-        <div className="view-toggle">
-          <UnorderedListOutlined className={`icon ${viewData === "table" ? "active" : ""}`} onClick={() => setViewData("table")} />
-          <AreaChartOutlined className={`icon ${viewData === "analytics" ? "active" : ""}`} onClick={() => setViewData("analytics")} />
-        </div>
-
-        <Button type="primary" icon={<PlusOutlined />} className="add-btn" onClick={() => setShowModal(true)}>New Transaction</Button>
+        <Button type="primary" icon={<PlusOutlined />} className="add-btn" onClick={() => setShowModal(true)}>
+          New Transaction
+        </Button>
       </div>
 
       {/* Main Content Section */}
       <div className="content">
-        {viewData === "table" ? <Table columns={columns} dataSource={allTransaction} pagination={{ pageSize: 6 }} /> : <Analytics allTransaction={allTransaction} />}
+        {viewData === "table" ? (
+          <div className="table-wrapper">
+            <Table columns={columns} dataSource={allTransaction} pagination={{ pageSize: 6 }} />
+          </div>
+        ) : (
+          <Analytics allTransaction={allTransaction} />
+        )}
       </div>
 
       {/* Add/Edit Modal */}
       <Modal title={editable ? "Edit Transaction" : "Add Transaction"} open={showModal} onCancel={() => setShowModal(false)} footer={false} className="custom-modal">
         <Form layout="vertical" onFinish={handleSubmit} initialValues={editable} className="custom-form">
-          <Form.Item label="Amount" name="amount" rules={[{ required: true, message: "Amount is required" }]}>
+          <Form.Item label="Amount" name="amount">
             <Input type="number" />
           </Form.Item>
 
-          <Form.Item label="Type" name="type" rules={[{ required: true, message: "Type is required" }]}>
+          <Form.Item label="Type" name="type">
             <Select>
               <Select.Option value="income">Income</Select.Option>
               <Select.Option value="expense">Expense</Select.Option>
@@ -174,7 +171,19 @@ const HomePage = () => {
           </Form.Item>
 
           <Form.Item label="Category" name="category">
-            <Input type="text" />
+            <Select>
+              <Select.Option value="salary">Salary</Select.Option>
+              <Select.Option value="Buisness Profit">Buisness Profit</Select.Option>
+              <Select.Option value="Investments">Investments</Select.Option>
+              <Select.Option value="Rentals">Rentals</Select.Option>
+              <Select.Option value="Government Profits">Government Profits</Select.Option>
+              <Select.Option value="food">Food</Select.Option>
+              <Select.Option value="bills">Bills</Select.Option>
+              <Select.Option value="fees">Fees</Select.Option>
+              <Select.Option value="Movie">Movie</Select.Option>
+              <Select.Option value="Medical Expenses">Medical Expenses</Select.Option>
+              <Select.Option value="Daily Essential">Daily Essential</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item label="Date" name="date">
@@ -190,7 +199,9 @@ const HomePage = () => {
           </Form.Item>
 
           <div className="modal-footer">
-            <Button type="primary" htmlType="submit">Save</Button>
+            <Button type="primary" htmlType="submit">
+              Save
+            </Button>
           </div>
         </Form>
       </Modal>
@@ -199,6 +210,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-
 
