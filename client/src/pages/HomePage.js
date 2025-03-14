@@ -1,213 +1,99 @@
 import React, { useState, useEffect } from "react";
-import Layout from "../components/layout/Layout";
-import { Modal, Form, Input, Select, message, Table, DatePicker, Button } from "antd";
-import { UnorderedListOutlined, AreaChartOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import moment from "moment";
+import { Form, Input, Button, Typography, Card, message } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Spinner from "../components/Spinner";
-import Analytics from "../components/Analytics";
-import "../styles/HomePage.css";
+import "../styles/Register.css";
 
-const { RangePicker } = DatePicker;
+const { Title, Text } = Typography;
 
-const HomePage = () => {
-  const [showModal, setShowModal] = useState(false);
+const Register = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [allTransaction, setAllTransaction] = useState([]);
-  const [frequency, setFrequency] = useState("7");
-  const [selectedDate, setSelectedDate] = useState([]);
-  const [type, setType] = useState("all");
-  const [viewData, setViewData] = useState("table");
-  const [editable, setEditable] = useState(null);
+
+  const submitHandler = async (values) => {
+    try {
+      setLoading(true);
+      await axios.post("/api/v1/users/register", values);
+      message.success("Registration Successful");
+      setLoading(false);
+      navigate("/login");
+    } catch (error) {
+      setLoading(false);
+      message.error("Something went wrong. Please try again.");
+    }
+  };
 
   useEffect(() => {
-    fetchTransactions();
-  }, [frequency, selectedDate, type]);
-
-  const fetchTransactions = async () => {
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      setLoading(true);
-      const res = await axios.post("/api/v1/transactions/get-transaction", {
-        userid: user._id,
-        frequency,
-        selectedDate,
-        type,
-      });
-      setAllTransaction(res.data);
-    } catch (error) {
-      message.error("Error fetching transactions");
-    } finally {
-      setLoading(false);
+    if (localStorage.getItem("user")) {
+      navigate("/");
     }
-  };
-
-  const handleDelete = async (record) => {
-    try {
-      setLoading(true);
-      await axios.post("/api/v1/transactions/delete-transaction", { transactionID: record._id });
-      message.success("Transaction deleted");
-      fetchTransactions();
-    } catch (error) {
-      message.error("Unable to delete transaction");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (values) => {
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      setLoading(true);
-      if (editable) {
-        await axios.post("/api/v1/transactions/edit-transaction", {
-          payload: { ...values, userId: user._id },
-          transactionID: editable._id,
-        });
-        message.success("Transaction updated successfully");
-      } else {
-        await axios.post("/api/v1/transactions/add-transaction", { ...values, userid: user._id });
-        message.success("Transaction added successfully");
-      }
-      setShowModal(false);
-      setEditable(null);
-      fetchTransactions();
-    } catch (error) {
-      message.error("Failed to save transaction");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const columns = [
-    {
-      title: "Date",
-      dataIndex: "date",
-      render: (text) => <span>{moment(text).format("YYYY-MM-DD")}</span>,
-    },
-    {
-      title: "Amount",
-      dataIndex: "amount",
-      render: (amount) => <span className="amount-text">₹{amount}</span>,
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-      render: (type) => <span className={`type-badge ${type}`}>{type.toUpperCase()}</span>,
-    },
-    {
-      title: "Category",
-      dataIndex: "category",
-    },
-    {
-      title: "Reference",
-      dataIndex: "reference",
-    },
-    {
-      title: "Actions",
-      render: (text, record) => (
-        <div className="action-icons">
-          <EditOutlined className="edit-icon" onClick={() => { setEditable(record); setShowModal(true); }} />
-          <DeleteOutlined className="delete-icon mx-2" onClick={() => handleDelete(record)} />
-        </div>
-      ),
-    },
-  ];
+  }, [navigate]);
 
   return (
-    <Layout>
+    <div className="register-page">
       {loading && <Spinner />}
-
-      {/* Filters Section */}
-      <div className="filters">
-        <div className="filter-group">
-          <label className="filter-label">Time Range</label>
-          <Select className="select-dropdown" value={frequency} onChange={setFrequency}>
-            <Select.Option value="7">Last 1 Week</Select.Option>
-            <Select.Option value="30">Last 1 Month</Select.Option>
-            <Select.Option value="365">Last 1 Year</Select.Option>
-            <Select.Option value="custom">Custom</Select.Option>
-          </Select>
-          {frequency === "custom" && <RangePicker className="range-picker" value={selectedDate} onChange={setSelectedDate} />}
-        </div>
-
-        <div className="filter-group">
-          <label className="filter-label">Transaction Type</label>
-          <Select className="select-dropdown" value={type} onChange={setType}>
-            <Select.Option value="all">ALL</Select.Option>
-            <Select.Option value="income">Income</Select.Option>
-            <Select.Option value="expense">Expense</Select.Option>
-          </Select>
-        </div>
-
-        <Button type="primary" icon={<PlusOutlined />} className="add-btn" onClick={() => setShowModal(true)}>
-          New Transaction
-        </Button>
-      </div>
-
-      {/* Main Content Section */}
-      <div className="content">
-        {viewData === "table" ? (
-          <div className="table-wrapper">
-            <Table columns={columns} dataSource={allTransaction} pagination={{ pageSize: 6 }} />
+      <div className="register-container">
+        <div className="register-left">
+          <img
+            src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+            alt="Expense Tracker"
+            className="register-bg-image"
+          />
+          <div className="register-overlay">
+            <Title level={2} className="register-title">
+              Expense Tracker
+            </Title>
+            <Text className="register-subtitle">
+              Manage your finances efficiently!
+            </Text>
           </div>
-        ) : (
-          <Analytics allTransaction={allTransaction} />
-        )}
+        </div>
+        <Card className="register-card">
+          <Title level={3} className="card-title">
+            Create an Account
+          </Title>
+          <Form layout="vertical" onFinish={submitHandler} className="register-form">
+            <Form.Item
+              label="Name"
+              name="name"
+              rules={[{ required: true, message: "Please enter your name" }]}
+            >
+              <Input size="large" placeholder="Enter your name" />
+            </Form.Item>
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[{ required: true, message: "Please enter a valid email" }]}
+            >
+              <Input size="large" type="email" placeholder="Enter your email" />
+            </Form.Item>
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[{ required: true, message: "Please enter your password" }]}
+            >
+              <Input.Password size="large" placeholder="Enter your password" />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                block
+                className="register-btn"
+              >
+                Register
+              </Button>
+            </Form.Item>
+          </Form>
+          <Text className="login-link">
+            Already registered? <Link to="/login">Click here to login</Link>
+          </Text>
+        </Card>
       </div>
-
-      {/* Add/Edit Modal */}
-      <Modal title={editable ? "Edit Transaction" : "Add Transaction"} open={showModal} onCancel={() => setShowModal(false)} footer={false} className="custom-modal">
-        <Form layout="vertical" onFinish={handleSubmit} initialValues={editable} className="custom-form">
-          <Form.Item label="Amount" name="amount">
-            <Input type="number" />
-          </Form.Item>
-
-          <Form.Item label="Type" name="type">
-            <Select>
-              <Select.Option value="income">Income</Select.Option>
-              <Select.Option value="expense">Expense</Select.Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item label="Category" name="category">
-            <Select>
-              <Select.Option value="salary">Salary</Select.Option>
-              <Select.Option value="Buisness Profit">Buisness Profit</Select.Option>
-              <Select.Option value="Investments">Investments</Select.Option>
-              <Select.Option value="Rentals">Rentals</Select.Option>
-              <Select.Option value="Government Profits">Government Profits</Select.Option>
-              <Select.Option value="food">Food</Select.Option>
-              <Select.Option value="bills">Bills</Select.Option>
-              <Select.Option value="fees">Fees</Select.Option>
-              <Select.Option value="Movie">Movie</Select.Option>
-              <Select.Option value="Medical Expenses">Medical Expenses</Select.Option>
-              <Select.Option value="Daily Essential">Daily Essential</Select.Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item label="Date" name="date">
-            <Input type="date" />
-          </Form.Item>
-
-          <Form.Item label="Reference" name="reference">
-            <Input type="text" />
-          </Form.Item>
-
-          <Form.Item label="Description" name="description">
-            <Input type="text" />
-          </Form.Item>
-
-          <div className="modal-footer">
-            <Button type="primary" htmlType="submit">
-              Save
-            </Button>
-          </div>
-        </Form>
-      </Modal>
-    </Layout>
+    </div>
   );
 };
 
-export default HomePage;
-
+export default Register;
