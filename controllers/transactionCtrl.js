@@ -46,15 +46,25 @@ catch(error){
     res.status(500).json(error)
 }
 }
-const addTransaction=async(req,res)=>{
-    try{
-const newTransaction =new transactionModel(req.body)
-await newTransaction.save()
-res.status(201).send('Transaction created')
+const addTransaction = async (req, res) => {
+    try {
+        const { userid, amount, type, category, description, date } = req.body;
+        
+        // Check for missing fields
+        if (!userid) return res.status(400).json({ error: "Enter userid" });
+        if (!amount) return res.status(400).json({ error: "Enter amount" });
+        if (!type) return res.status(400).json({ error: "Enter type" });
+        if (!category) return res.status(400).json({ error: "Enter category" });
+        if (!description) return res.status(400).json({ error: "Enter description" });
+        if (!date) return res.status(400).json({ error: "Enter date" });
+        
+        const newTransaction = new transactionModel(req.body);
+        await newTransaction.save();
+        
+        res.status(201).json({ message: "Transaction created" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
-    catch(error){
-console.log(error)
-res.status(500).json(error)
-    }
-}
+};
 module.exports={getAllTransaction,addTransaction,editTransaction,deleteTransaction}
