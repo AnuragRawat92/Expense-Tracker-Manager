@@ -33,26 +33,39 @@ const Login = () => {
   }, [navigate]);
 
   return (
-    <div className="login-container">
+    <div className="login-page">
       {loading && <Spinner />}
-      <div className="login-card">
-        <img src="https://media.licdn.com/dms/image/v2/D5612AQFQkcIrBJ2O1g/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1712583799874?e=2147483647&v=beta&t=hRIew2WoXl89GN6QDa092_OmAToPnphFxAoM4SFjCb8" alt="Expense Tracker" className="login-image"/>
-        <h1 className="login-title">Expense Tracker</h1>
-        <p className="login-subtitle">Track & Manage Your Finances Easily</p>
-        <Form layout="vertical" onFinish={submitHandler} className="login-form">
-          <Form.Item label="Email" name="email">
-            <Input type="email" placeholder="Enter your email" />
-          </Form.Item>
-          <Form.Item label="Password" name="password">
-            <Input type="password" placeholder="Enter your password" />
-          </Form.Item>
-          <div className="login-actions">
-            <Link to="/register" className="register-link">
-              New here? Sign up
-            </Link>
-            <button className="login-btn">Login</button>
+      <div className="login-container">
+        <div className="login-left">
+          <img
+            src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+            alt="Expense Tracker"
+            className="login-bg-image"
+          />
+          <div className="login-overlay">
+            <h1 className="login-title">Expense Tracker</h1>
+            <p className="login-subtitle">
+              Track & Manage Your Finances Easily
+            </p>
           </div>
-        </Form>
+        </div>
+        <div className="login-right">
+          <Form layout="vertical" onFinish={submitHandler} className="login-form">
+            <h2 className="form-title">Welcome Back!</h2>
+            <Form.Item label="Email" name="email">
+              <Input type="email" placeholder="Enter your email" />
+            </Form.Item>
+            <Form.Item label="Password" name="password">
+              <Input type="password" placeholder="Enter your password" />
+            </Form.Item>
+            <div className="login-actions">
+              <button className="login-btn">Login</button>
+              <Link to="/register" className="register-link">
+                New here? Sign up
+              </Link>
+            </div>
+          </Form>
+        </div>
       </div>
     </div>
   );
