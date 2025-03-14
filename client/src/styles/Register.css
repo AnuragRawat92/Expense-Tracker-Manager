@@ -1,75 +1,128 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
-
-/* 🌟 Limit background styles to the Register page */
-.register-container {
-  background: url("https://i.pinimg.com/736x/d0/00/76/d00076e5ca48c27caff497c29dba1272.jpg") center/cover no-repeat;
+/* General Styles */
+.register-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
   min-height: 100vh;
-  padding: 20px;
+  background-color: #f0f2f5;
+  font-family: 'Arial', sans-serif;
 }
 
-/* 🌟 Card - Only affects the register form */
-.register-card {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
+.register-container {
+  display: flex;
+  max-width: 1000px;
   width: 100%;
-  max-width: 400px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.register-left {
+  flex: 1;
+  position: relative;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+}
+
+.register-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.register-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
   text-align: center;
-  border: 3px solid #2e8b57;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
 }
 
-/* 🌟 Ensure styles only apply to inputs inside .register-container */
-.register-container .ant-input,
-.register-container .ant-input-password {
-  background: white !important;
-  color: black !important;
-  border-radius: 8px;
-  padding: 12px;
-  border: 1px solid #2e8b57;
-  font-size: 16px;
+.register-title {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
-.register-container .ant-input:focus,
-.register-container .ant-input-password:focus {
-  border-color: #276749 !important;
-  box-shadow: 0px 0px 5px rgba(46, 139, 87, 0.5);
+.register-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
 }
 
-/* 🌟 Restrict button styles */
-.register-container .register-btn {
-  background: #2e8b57;
-  color: white;
+.register-card {
+  flex: 1;
+  padding: 40px;
   border: none;
-  padding: 12px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 16px;
-  transition: 0.3s;
+  box-shadow: none;
+}
+
+.card-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.register-form .ant-form-item-label {
+  font-weight: bold;
+  color: #555;
+}
+
+.register-form .ant-input {
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.register-btn {
   width: 100%;
+  padding: 10px;
+  background: #6a11cb;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
 
-.register-container .register-btn:hover {
-  background: #276749;
+.register-btn:hover {
+  background: #2575fc;
 }
 
-/* 🌟 Responsive Fixes */
+.login-link {
+  text-align: center;
+  margin-top: 15px;
+  color: #6a11cb;
+}
+
+.login-link a {
+  color: #6a11cb;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
+  .register-container {
+    flex-direction: column;
+  }
+
+  .register-left {
+    display: none;
+  }
+
   .register-card {
-    width: 90%;
-    padding: 30px;
+    padding: 20px;
   }
 }
-
-@media (max-width: 480px) {
-  .register-card {
-    padding: 25px;
-    border-radius: 10px;
-  }
-}
-
